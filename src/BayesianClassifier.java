@@ -127,29 +127,46 @@ public class BayesianClassifier {
             //remove Subject:
             fileContent = fileContent.replace("Subject: ", " ");
             //remove special characters
-            fileContent = fileContent.replaceAll("[^a-zA-Z0-9] +","");
+            //fileContent = fileContent.replaceAll("[^a-zA-Z0-9] +","");
             //System.out.println(fileContent);
 
             //for each word update the hashmap
             for(String word:fileContent.split(" ")){
-                if(word != " ") {
-                    updateWordToHashMap(word, (HashMap<String, Integer>) spamWords);
-                }
-            }
+                //Prepare for stemming
+                Stemmer stemmer = new Stemmer();
 
-            //print hashmap
-            Iterator it = spamWords.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry)it.next();
-                System.out.println(pair.getKey() + " = " + pair.getValue());
-                it.remove(); // avoids a ConcurrentModificationException
-            }
+                //lowercase the string
+                word = word.toLowerCase();
 
+                //creatinc a char array from the current word
+                char [] wordChars = word.toCharArray();
+
+                //stem the cars and save them in a new string
+                stemmer.add(wordChars, wordChars.length);
+                stemmer.stem();
+
+                //System.out.print("original word: "+word+"\t");
+                word = stemmer.toString();
+                //System.out.print("stemmed word: "+word+"\n");
+
+                //add the new stemmed word to the hash map
+                updateWordToHashMap(word, (HashMap<String, Integer>) spamWords);
+            }
+            //remove the " " from the hash map
+            spamWords.remove(" ");
 
 
             numberOfFiles++;
 
         }
+        //print hashmap
+//        Iterator itSpam = spamWords.entrySet().iterator();
+//        while (itSpam.hasNext()) {
+//            Map.Entry pairSpam = (Map.Entry)itSpam.next();
+//            System.out.println(pairSpam.getKey() + " = " + pairSpam.getValue());
+//            itSpam.remove(); // avoids a ConcurrentModificationException
+//        }
+
         System.out.println(numberOfFiles+" files found in spam training folder");
 
         numberOfFiles = 0;
@@ -159,8 +176,52 @@ public class BayesianClassifier {
                 TODO
              */
 
+            //Reading from the file
+            String fileContent = readFromFile(f);
+            //TODO Sanitizing the file, i.e. removing stopwords, stemming
+
+            //remove lines
+            fileContent = fileContent.replace("\n"," ");
+            //remove Subject:
+            fileContent = fileContent.replace("Subject: ", " ");
+            //remove special characters
+            fileContent = fileContent.replaceAll("[^a-zA-Z0-9] +","");
+            //System.out.println(fileContent);
+
+            //for each word update the hashmap
+            for(String word:fileContent.split(" ")){
+                //Prepare for stemming
+                Stemmer stemmer = new Stemmer();
+
+                //lowercase the string
+                word = word.toLowerCase();
+
+                //creatinc a char array from the current word
+                char [] wordChars = word.toCharArray();
+
+                //stem the cars and save them in a new string
+                stemmer.add(wordChars, wordChars.length);
+                stemmer.stem();
+
+                //System.out.print("original word: "+word+"\t");
+                word = stemmer.toString();
+                //System.out.print("stemmed word: "+word+"\n");
+
+                updateWordToHashMap(word, (HashMap<String, Integer>) hamWords);
+            }
+            //remove the " " from the hash map
+            hamWords.remove(" ");
+
             numberOfFiles++;
         }
+        //print hashmap
+//        Iterator itHam = hamWords.entrySet().iterator();
+//        while (itHam.hasNext()) {
+//            Map.Entry pairHam = (Map.Entry)itHam.next();
+//            System.out.println(pairHam.getKey() + " = " + pairHam.getValue());
+//            itHam.remove(); // avoids a ConcurrentModificationException
+//        }
+
         System.out.println(numberOfFiles+" files found in ham training folder");
 
     }
